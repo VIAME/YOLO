@@ -64,6 +64,17 @@ LOG_BATCH_VIZ_TO_DISK=1 python yolo/lazy.py \
 #"image_size=[224,224]" \
 #--help
 
+
+
+### Redefine environs for quick inference tests
+BUNDLE_DPATH=$HOME/data/dvc-repos/viame_dvc/private/Benthic/HABCAM-FISH
+TRAIN_FPATH=$BUNDLE_DPATH/train-v05-noscallop.kwcoco.zip
+VALI_FPATH=$BUNDLE_DPATH/vali-v05-noscallop.kwcoco.zip
+TEST_FPATH=$BUNDLE_DPATH/test-v05-noscallop.kwcoco.zip
+MODULE_DPATH=$(python -c "import yolo, pathlib; print(pathlib.Path(yolo.__file__).parent)")
+CONFIG_DPATH=$(python -c "import yolo.config, pathlib; print(pathlib.Path(yolo.config.__file__).parent / 'dataset')")
+DATASET_CONFIG_FPATH=$CONFIG_DPATH/viame-v05-noscallop.yaml
+
 # Grab a checkpoint
 CKPT_FPATH=$(python -c "if 1:
     import pathlib
@@ -78,6 +89,7 @@ FNAME=$(kwcoco info "$TEST_FPATH" --show_images 10 | jq -r ".images[2] | .file_n
 FPATH=$BUNDLE_DPATH/$FNAME
 echo "FPATH = $FPATH"
 
+export DISABLE_RICH_HANDLER=1
 export CUDA_VISIBLE_DEVICES="1,"
 python yolo/lazy.py \
     task.data.source="$TEST_FPATH" \
