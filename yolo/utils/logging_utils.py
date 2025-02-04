@@ -322,6 +322,14 @@ def setup(cfg: Config):
 
     save_path = validate_log_directory(cfg, cfg.name)
 
+    WRITE_CONFIG = 1
+    if WRITE_CONFIG:
+        # Dump the config to the disk in the output folder
+        from omegaconf import OmegaConf
+        config_text = OmegaConf.to_yaml(cfg)
+        config_fpath = save_path / f'{cfg.task.task}_config.yaml'
+        config_fpath.write_text(config_text)
+
     progress, loggers = [], []
 
     if hasattr(cfg.task, "ema") and cfg.task.ema.enable:
