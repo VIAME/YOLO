@@ -13,6 +13,3 @@ use_tensorboard: False
 weight: True # Path to weight or True for auto, False for no pretrained weight
 weight_dir: null # Directory for weights, defaults to out_path/weights if null
 accelerator: 'auto'
-
-timeout: null # Max training time in seconds (null=no limit, e.g. 1209600 for two weeks)
-save_best: True # Save the best checkpoint based on validation mAP

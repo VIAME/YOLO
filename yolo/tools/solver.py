@@ -16,7 +16,11 @@ from yolo.utils.model_utils import PostProcess, create_optimizer, create_schedul
 class BaseModel(LightningModule):
     def __init__(self, cfg: Config):
         super().__init__()
-        self.model = create_model(cfg.model, class_num=cfg.dataset.class_num, weight_path=cfg.weight)
+        # Use weight_dir if specified, otherwise default to out_path/weights
+        weight_dir = getattr(cfg, 'weight_dir', None)
+        if weight_dir is None:
+            weight_dir = Path(cfg.out_path) / "weights"
+        self.model = create_model(cfg.model, class_num=cfg.dataset.class_num, weight_path=cfg.weight, weight_dir=weight_dir)
 
     def forward(self, x):
         return self.model(x)

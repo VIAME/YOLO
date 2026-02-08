@@ -69,7 +69,8 @@ class YOLORichProgressBar(RichProgressBar):
             self._reset_progress_bar_ids()
             reconfigure(**self._console_kwargs)
             self._console = Console()
-            self._console.clear_live()
+            if self._console._live_stack:
+                self._console.clear_live()
             self.progress = YOLOCustomProgress(
                 *self.configure_columns(trainer),
                 auto_refresh=False,
@@ -145,7 +146,7 @@ class YOLORichProgressBar(RichProgressBar):
         self.past_results.append((trainer.current_epoch, ap_main))
 
     @override
-    def refresh(self) -> None:
+    def refresh(self, hard: bool = False) -> None:
         if self.progress:
             self.progress.refresh()
 

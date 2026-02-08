@@ -1,6 +1,6 @@
 hydra:
   run:
-    dir: runs
+    dir: ${out_path}
 
 name: v9-dev
 

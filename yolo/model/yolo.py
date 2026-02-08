@@ -224,11 +224,14 @@ class YOLO(nn.Module):
             self.model.load_state_dict(model_state_dict)
 
 
-def create_model(model_cfg: ModelConfig, weight_path: Union[bool, Path] = True, class_num: int = 80) -> YOLO:
+def create_model(model_cfg: ModelConfig, weight_path: Union[bool, Path] = True, class_num: int = 80, weight_dir: Union[str, Path, None] = None) -> YOLO:
     """Constructs and returns a model from a Dictionary configuration file.
 
     Args:
         config_file (dict): The configuration file of the model.
+        weight_path: Path to weight file, True for auto-download, or False for no weights.
+        class_num: Number of classes.
+        weight_dir: Directory where weights are stored/downloaded. Defaults to "weights" in current directory.
 
     Returns:
         YOLO: An instance of the model defined by the given configuration.
@@ -238,7 +241,11 @@ def create_model(model_cfg: ModelConfig, weight_path: Union[bool, Path] = True, 
     if weight_path:
         logger.info('🏋 Initializing weights')
         if weight_path == True:
-            weight_path = Path("weights") / f"{model_cfg.name}.pt"
+            if weight_dir is None:
+                weight_dir = Path("weights")
+            else:
+                weight_dir = Path(weight_dir)
+            weight_path = weight_dir / f"{model_cfg.name}.pt"
         elif isinstance(weight_path, str):
             weight_path = Path(weight_path)
 

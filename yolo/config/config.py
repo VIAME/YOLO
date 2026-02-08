@@ -157,6 +157,7 @@ class Config:
     use_tensorboard: bool
 
     weight: Optional[str]
+    weight_dir: Optional[str]
     accelerator: str
 
 
