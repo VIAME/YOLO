@@ -93,6 +93,7 @@ def prepare_weight(download_link: Optional[str] = None, weight_path: Path = Path
 
     if weight_path.exists():
         logger.info(f"Weight file '{weight_path}' already exists.")
+        return
     try:
         download_file(weight_link, weight_path)
     except requests.exceptions.RequestException as e:

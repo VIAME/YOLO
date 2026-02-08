@@ -4,6 +4,8 @@ from pathlib import Path
 import hydra
 from omegaconf.dictconfig import DictConfig
 
+_IS_WINDOWS = sys.platform == "win32"
+
 # FIXME: messing with sys.path is a bad idea. Factor this out.
 project_root = Path(__file__).resolve().parent.parent
 sys.path.append(str(project_root))
@@ -44,7 +46,10 @@ def main(cfg: DictConfig):
         except (ValueError, TypeError):
             pass
 
-    trainer = Trainer(
+    # On Windows, force single-device training to avoid DDP issues:
+    # 1. torch.distributed.Backend may not be accessible
+    # 2. DDP subprocess launcher tries to re-invoke viame.exe which fails
+    trainer_kwargs = dict(
         accelerator=cfg.accelerator,
         max_epochs=getattr(cfg.task, "epoch", None),
         max_time=max_time,
@@ -59,6 +64,11 @@ def main(cfg: DictConfig):
         default_root_dir=save_path,
         num_sanity_val_steps=0,
     )
+    if _IS_WINDOWS:
+        trainer_kwargs["devices"] = 1
+        trainer_kwargs["strategy"] = "auto"
+
+    trainer = Trainer(**trainer_kwargs)
 
     if cfg.task.task == "train":
         model = TrainModel(cfg)

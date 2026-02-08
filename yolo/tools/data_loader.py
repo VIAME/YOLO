@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from queue import Empty, Queue
 from statistics import mean
@@ -301,10 +302,14 @@ def create_dataloader(data_cfg: DataConfig, dataset_cfg: DatasetConfig, task: st
         prepare_dataset(dataset_cfg, task)
     dataset = YoloDataset(data_cfg, dataset_cfg, task)
 
+    # On Windows, DataLoader worker subprocesses fail because
+    # multiprocessing spawn tries to re-invoke viame.exe as Python.
+    num_workers = 0 if sys.platform == "win32" else data_cfg.cpu_num
+
     return DataLoader(
         dataset,
         batch_size=data_cfg.batch_size,
-        num_workers=data_cfg.cpu_num,
+        num_workers=num_workers,
         pin_memory=data_cfg.pin_memory,
         collate_fn=collate_fn,
     )
