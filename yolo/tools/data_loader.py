@@ -302,9 +302,19 @@ def create_dataloader(data_cfg: DataConfig, dataset_cfg: DatasetConfig, task: st
         prepare_dataset(dataset_cfg, task)
     dataset = YoloDataset(data_cfg, dataset_cfg, task)
 
-    # On Windows, DataLoader worker subprocesses fail because
-    # multiprocessing spawn tries to re-invoke viame.exe as Python.
-    num_workers = 0 if sys.platform == "win32" else data_cfg.cpu_num
+    # Windows keeps 0 workers: every worker there is a spawn, and under the
+    # embedded VIAME interpreter those deadlock rather than merely failing to
+    # start (see viame.pytorch.utilities.spawn_safe_worker_count, which also
+    # documents the opt-out env var).
+    num_workers = data_cfg.cpu_num
+    if sys.platform == "win32" and num_workers:
+        try:
+            from viame.pytorch.utilities import spawn_safe_worker_count
+        except ImportError:
+            num_workers = 0
+        else:
+            num_workers = spawn_safe_worker_count(
+                num_workers, reason_prefix="[MITYolo] ")
 
     return DataLoader(
         dataset,
